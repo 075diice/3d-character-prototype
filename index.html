@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v12</title>
+  <title>Naakte Vrouw Prototype v13</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -39,7 +39,7 @@
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v12</span></h3>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v13</span></h3>
     <div id="status">Model laden...</div>
     <div class="slider-row">
       <label>Borsten</label>
@@ -93,8 +93,8 @@
     controls.maxDistance = 6;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
     dir.position.set(3, 5, 3);
     scene.add(dir);
 
@@ -102,18 +102,19 @@
     const status = document.getElementById('status');
 
     const loader = new GLTFLoader();
-    // CC0 female base mesh from Innerscene (MakeHuman based)
-    const modelUrl = 'https://www.innerscene.com/api/library/female-base-mesh-3d-person-rigged-a-pose-dba97ed5/model.glb';
+    // Known working public GLB (CesiumMan as fallback, but try a better one)
+    const modelUrl = 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb';
 
     loader.load(modelUrl, (gltf) => {
       model = gltf.scene;
-      model.scale.set(1.2, 1.2, 1.2);
+      model.scale.set(1.5, 1.5, 1.5);
       model.position.y = 0;
+      model.rotation.y = Math.PI;
       scene.add(model);
-      status.textContent = 'Model geladen (CC0)';
+      status.textContent = 'Model geladen';
       updateCharacter();
     }, undefined, (err) => {
-      status.textContent = 'Fout bij laden: ' + err.message;
+      status.textContent = 'Fout: ' + err.message;
       console.error(err);
     });
 
@@ -124,7 +125,7 @@
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
 
-      model.scale.set(1.2 * (1 + (b-1)*0.15), 1.2 * ht, 1.2 * (1 + (h-1)*0.2));
+      model.scale.set(1.5 * (1 + (b-1)*0.2), 1.5 * ht, 1.5 * (1 + (h-1)*0.2));
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
