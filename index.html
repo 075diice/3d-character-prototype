@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v14</title>
+  <title>Naakte Vrouw Prototype v16</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -12,57 +12,60 @@
       bottom: 10px;
       left: 10px;
       right: 10px;
-      background: rgba(0,0,0,0.85);
-      padding: 12px;
-      border-radius: 12px;
-      max-height: 45vh;
+      background: rgba(0,0,0,0.88);
+      padding: 14px;
+      border-radius: 14px;
+      max-height: 48vh;
       overflow-y: auto;
       font-size: 14px;
       z-index: 100;
+      backdrop-filter: blur(4px);
     }
-    .slider-row { display: flex; align-items: center; margin: 6px 0; gap: 8px; }
-    .slider-row label { width: 80px; font-size: 13px; }
-    .slider-row input[type=range] { flex: 1; }
-    .slider-row span { width: 40px; text-align: right; font-size: 12px; }
+    .slider-row { display: flex; align-items: center; margin: 7px 0; gap: 10px; }
+    .slider-row label { width: 90px; font-size: 13px; font-weight: 500; }
+    .slider-row input[type=range] { flex: 1; accent-color: #e91e63; }
+    .slider-row span { width: 42px; text-align: right; font-size: 12px; color: #ccc; }
     button {
       background: #e91e63;
       color: white;
       border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      margin: 4px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      margin-top: 6px;
       font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
     }
-    h3 { margin-bottom: 8px; font-size: 16px; }
-    #status { font-size: 12px; color: #aaa; margin-bottom: 6px; }
+    h3 { margin-bottom: 6px; font-size: 17px; }
+    #status { font-size: 12px; color: #aaa; margin-bottom: 8px; }
   </style>
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v14</span></h3>
-    <div id="status">Model laden...</div>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v16</span></h3>
+    <div id="status">Procedureel naakt model geladen</div>
     <div class="slider-row">
       <label>Borsten</label>
-      <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
+      <input type="range" id="breast" min="0.4" max="2.2" step="0.05" value="1">
       <span id="breastVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Taille</label>
-      <input type="range" id="waist" min="0.6" max="1.4" step="0.05" value="1">
+      <input type="range" id="waist" min="0.55" max="1.5" step="0.05" value="1">
       <span id="waistVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Heupen</label>
-      <input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1">
+      <input type="range" id="hips" min="0.65" max="1.9" step="0.05" value="1">
       <span id="hipsVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Lengte</label>
-      <input type="range" id="height" min="0.8" max="1.2" step="0.02" value="1">
-      <span id="heightVal">1.0</span>
+      <input type="range" id="height" min="0.75" max="1.25" step="0.02" value="1">
+      <span id="heightVal">1.00</span>
     </div>
     <button id="resetBtn">Reset</button>
-    <p style="margin-top:8px; font-size:12px; opacity:0.7;">Sleep om te draaien</p>
+    <p style="margin-top:10px; font-size:12px; opacity:0.65;">Sleep om te draaien · Pinch om te zoomen</p>
   </div>
 
   <script type="importmap">
@@ -72,59 +75,165 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
+    scene.background = new THREE.Color(0x12121f);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.2, 3.2);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.15, 3.4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x1a1a2e);
+    renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 1.0, 0);
+    controls.target.set(0, 0.95, 0);
     controls.enableDamping = true;
-    controls.minDistance = 1.2;
-    controls.maxDistance = 6;
+    controls.minDistance = 1.4;
+    controls.maxDistance = 7;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
-    dir.position.set(3, 5, 3);
-    scene.add(dir);
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.15);
+    key.position.set(2.5, 4, 2);
+    key.castShadow = true;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xaaaaff, 0.4);
+    fill.position.set(-2, 2, -1);
+    scene.add(fill);
 
-    let model = null;
-    const status = document.getElementById('status');
-
-    const loader = new GLTFLoader();
-    // Female supermodel GLB from GitHub
-    const modelUrl = 'https://raw.githubusercontent.com/MickMickMick73/godot-meshy-supermodel-biped/main/Meshy_AI_A_female_supermodel_i_biped_Animation_Walking_withSkin.glb';
-
-    loader.load(modelUrl, (gltf) => {
-      model = gltf.scene;
-      model.scale.set(1.0, 1.0, 1.0);
-      model.position.y = 0;
-      scene.add(model);
-      status.textContent = 'Vrouwelijk model geladen';
-      updateCharacter();
-    }, undefined, (err) => {
-      status.textContent = 'Fout: ' + err.message;
-      console.error(err);
+    // Skin material
+    const skin = new THREE.MeshStandardMaterial({
+      color: 0xf5d0b5,
+      roughness: 0.55,
+      metalness: 0.05,
     });
 
+    const body = new THREE.Group();
+
+    // Head
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32), skin);
+    head.position.y = 1.72;
+    body.add(head);
+
+    // Neck
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.18, 16), skin);
+    neck.position.y = 1.52;
+    body.add(neck);
+
+    // Chest / upper torso
+    const chest = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 24), skin);
+    chest.scale.set(1.15, 0.85, 0.7);
+    chest.position.y = 1.28;
+    body.add(chest);
+
+    // Breasts (separate so we can scale them)
+    const leftBreast = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 20), skin);
+    leftBreast.position.set(-0.13, 1.22, 0.18);
+    leftBreast.scale.set(1, 0.9, 0.85);
+    body.add(leftBreast);
+
+    const rightBreast = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 20), skin);
+    rightBreast.position.set(0.13, 1.22, 0.18);
+    rightBreast.scale.set(1, 0.9, 0.85);
+    body.add(rightBreast);
+
+    // Waist
+    const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.28, 20), skin);
+    waist.position.y = 1.02;
+    body.add(waist);
+
+    // Hips / pelvis
+    const hips = new THREE.Mesh(new THREE.SphereGeometry(0.26, 28, 22), skin);
+    hips.scale.set(1.25, 0.7, 0.85);
+    hips.position.y = 0.78;
+    body.add(hips);
+
+    // Butt (simple)
+    const leftButt = new THREE.Mesh(new THREE.SphereGeometry(0.14, 20, 16), skin);
+    leftButt.position.set(-0.1, 0.78, -0.18);
+    body.add(leftButt);
+    const rightButt = leftButt.clone();
+    rightButt.position.x = 0.1;
+    body.add(rightButt);
+
+    // Arms
+    function makeArm(side) {
+      const group = new THREE.Group();
+      const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, 0.32, 12), skin);
+      upper.position.y = -0.16;
+      group.add(upper);
+      const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.28, 12), skin);
+      lower.position.y = -0.42;
+      group.add(lower);
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 10), skin);
+      hand.position.y = -0.58;
+      group.add(hand);
+      group.position.set(side * 0.42, 1.22, 0);
+      group.rotation.z = side * 0.15;
+      return group;
+    }
+    const leftArm = makeArm(-1);
+    const rightArm = makeArm(1);
+    body.add(leftArm, rightArm);
+
+    // Legs
+    function makeLeg(side) {
+      const group = new THREE.Group();
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.075, 0.42, 14), skin);
+      thigh.position.y = -0.21;
+      group.add(thigh);
+      const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.38, 12), skin);
+      calf.position.y = -0.58;
+      group.add(calf);
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.22), skin);
+      foot.position.set(0, -0.8, 0.04);
+      group.add(foot);
+      group.position.set(side * 0.12, 0.58, 0);
+      return group;
+    }
+    const leftLeg = makeLeg(-1);
+    const rightLeg = makeLeg(1);
+    body.add(leftLeg, rightLeg);
+
+    body.position.y = 0;
+    scene.add(body);
+
+    // Ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 10),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a28, roughness: 0.9 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.01;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Update function – sliders control specific parts
     function updateCharacter() {
-      if (!model) return;
       const b = parseFloat(document.getElementById('breast').value);
       const w = parseFloat(document.getElementById('waist').value);
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
 
-      model.scale.set(1.0 * (1 + (b-1)*0.15), 1.0 * ht, 1.0 * (1 + (h-1)*0.15));
+      // Breasts
+      leftBreast.scale.set(b, b * 0.9, b * 0.85);
+      rightBreast.scale.set(b, b * 0.9, b * 0.85);
+
+      // Waist
+      waist.scale.set(w, 1, w * 0.9);
+
+      // Hips
+      hips.scale.set(1.25 * h, 0.7, 0.85 * h);
+      leftButt.scale.set(h, h, h);
+      rightButt.scale.set(h, h, h);
+
+      // Height – scale whole body on Y (and slightly adjust camera target)
+      body.scale.y = ht;
+      body.position.y = (ht - 1) * 0.15;
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
@@ -140,9 +249,11 @@
       updateCharacter();
     });
 
-    ['breast','waist','hips','height'].forEach(id => {
+    ['breast', 'waist', 'hips', 'height'].forEach(id => {
       document.getElementById(id).addEventListener('input', updateCharacter);
     });
+
+    updateCharacter();
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
