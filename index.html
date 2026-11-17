@@ -108,16 +108,21 @@
     controls.maxDistance = 6;
     controls.update();
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    // Lights - veel sterker voor zichtbaarheid
+    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight.position.set(2, 4, 2);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight.position.set(3, 5, 3);
     dirLight.castShadow = true;
     scene.add(dirLight);
-    const rim = new THREE.DirectionalLight(0xffaacc, 0.5);
+    const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight2.position.set(-3, 4, -2);
+    scene.add(dirLight2);
+    const rim = new THREE.DirectionalLight(0xffaacc, 0.8);
     rim.position.set(-2, 3, -1);
     scene.add(rim);
+    const fill = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+    scene.add(fill);
 
     // Ground
     const ground = new THREE.Mesh(
@@ -138,12 +143,24 @@
 
     loader.load(modelUrl, (gltf) => {
       vrm = gltf.userData.vrm;
-      VRMUtils.rotateVRM0(vrm); // For older VRM compatibility if needed
+      // VRMUtils.rotateVRM0(vrm); // only for VRM0
 
       const model = vrm.scene;
       model.traverse((obj) => {
         obj.castShadow = true;
         obj.receiveShadow = true;
+        if (obj.isMesh && obj.material) {
+          // Force materials to be visible
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => {
+              m.side = THREE.DoubleSide;
+              if (m.emissive) m.emissive.set(0x111111);
+            });
+          } else {
+            obj.material.side = THREE.DoubleSide;
+            if (obj.material.emissive) obj.material.emissive.set(0x111111);
+          }
+        }
       });
       scene.add(model);
 
@@ -152,7 +169,7 @@
 
       updateCharacter();
     }, undefined, (err) => {
-      loading.textContent = 'Fout bij laden model: ' + err.message;
+      loading.textContent = 'Fout bij laden model. Probeer te refreshen.';
       console.error(err);
     });
 
