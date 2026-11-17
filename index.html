@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v11</title>
+  <title>Naakte Vrouw Prototype v12</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -34,11 +34,13 @@
       font-size: 14px;
     }
     h3 { margin-bottom: 8px; font-size: 16px; }
+    #status { font-size: 12px; color: #aaa; margin-bottom: 6px; }
   </style>
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v11</span></h3>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v12</span></h3>
+    <div id="status">Model laden...</div>
     <div class="slider-row">
       <label>Borsten</label>
       <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
@@ -70,12 +72,13 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.1, 2.8);
+    camera.position.set(0, 1.2, 3.2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -90,122 +93,38 @@
     controls.maxDistance = 6;
     controls.update();
 
-    const skinMat = new THREE.MeshBasicMaterial({ color: 0xf5d0b5 });
-    const bodyParts = {};
-    const characterGroup = new THREE.Group();
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+    dir.position.set(3, 5, 3);
+    scene.add(dir);
 
-    // Head (smaller, more proportional)
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 32), skinMat);
-    head.position.y = 1.62;
-    head.scale.set(1, 1.15, 1);
-    characterGroup.add(head);
+    let model = null;
+    const status = document.getElementById('status');
 
-    // Neck
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.045, 0.1, 16), skinMat);
-    neck.position.y = 1.5;
-    characterGroup.add(neck);
+    const loader = new GLTFLoader();
+    // CC0 female base mesh from Innerscene (MakeHuman based)
+    const modelUrl = 'https://www.innerscene.com/api/library/female-base-mesh-3d-person-rigged-a-pose-dba97ed5/model.glb';
 
-    // Upper torso / chest
-    const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.11, 0.22, 24), skinMat);
-    chest.position.y = 1.35;
-    bodyParts.chest = chest;
-    characterGroup.add(chest);
-
-    // Lower torso / waist
-    const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.2, 24), skinMat);
-    waist.position.y = 1.15;
-    bodyParts.waist = waist;
-    characterGroup.add(waist);
-
-    // Breasts (better placement)
-    const breastL = new THREE.Mesh(new THREE.SphereGeometry(0.065, 24, 24), skinMat);
-    breastL.position.set(-0.065, 1.38, 0.07);
-    breastL.scale.set(1, 0.85, 1);
-    bodyParts.breastL = breastL;
-    characterGroup.add(breastL);
-
-    const breastR = new THREE.Mesh(new THREE.SphereGeometry(0.065, 24, 24), skinMat);
-    breastR.position.set(0.065, 1.38, 0.07);
-    breastR.scale.set(1, 0.85, 1);
-    bodyParts.breastR = breastR;
-    characterGroup.add(breastR);
-
-    // Hips
-    const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.18, 24), skinMat);
-    hips.position.y = 0.98;
-    bodyParts.hips = hips;
-    characterGroup.add(hips);
-
-    // Pelvis / crotch
-    const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.08, 20, 20), skinMat);
-    pelvis.position.y = 0.88;
-    pelvis.scale.set(1.1, 0.7, 0.9);
-    characterGroup.add(pelvis);
-
-    // Upper arms
-    const upperArmGeo = new THREE.CylinderGeometry(0.035, 0.03, 0.28, 12);
-    const upperArmL = new THREE.Mesh(upperArmGeo, skinMat);
-    upperArmL.position.set(-0.18, 1.32, 0);
-    upperArmL.rotation.z = 0.25;
-    characterGroup.add(upperArmL);
-    const upperArmR = new THREE.Mesh(upperArmGeo, skinMat);
-    upperArmR.position.set(0.18, 1.32, 0);
-    upperArmR.rotation.z = -0.25;
-    characterGroup.add(upperArmR);
-
-    // Lower arms
-    const lowerArmGeo = new THREE.CylinderGeometry(0.028, 0.025, 0.25, 12);
-    const lowerArmL = new THREE.Mesh(lowerArmGeo, skinMat);
-    lowerArmL.position.set(-0.28, 1.12, 0);
-    lowerArmL.rotation.z = 0.1;
-    characterGroup.add(lowerArmL);
-    const lowerArmR = new THREE.Mesh(lowerArmGeo, skinMat);
-    lowerArmR.position.set(0.28, 1.12, 0);
-    lowerArmR.rotation.z = -0.1;
-    characterGroup.add(lowerArmR);
-
-    // Thighs
-    const thighGeo = new THREE.CylinderGeometry(0.055, 0.04, 0.4, 16);
-    const thighL = new THREE.Mesh(thighGeo, skinMat);
-    thighL.position.set(-0.07, 0.68, 0);
-    characterGroup.add(thighL);
-    const thighR = new THREE.Mesh(thighGeo, skinMat);
-    thighR.position.set(0.07, 0.68, 0);
-    characterGroup.add(thighR);
-
-    // Calves
-    const calfGeo = new THREE.CylinderGeometry(0.038, 0.03, 0.38, 16);
-    const calfL = new THREE.Mesh(calfGeo, skinMat);
-    calfL.position.set(-0.07, 0.28, 0);
-    characterGroup.add(calfL);
-    const calfR = new THREE.Mesh(calfGeo, skinMat);
-    calfR.position.set(0.07, 0.28, 0);
-    characterGroup.add(calfR);
-
-    // Feet
-    const footGeo = new THREE.BoxGeometry(0.055, 0.025, 0.11);
-    const footL = new THREE.Mesh(footGeo, skinMat);
-    footL.position.set(-0.07, 0.015, 0.02);
-    characterGroup.add(footL);
-    const footR = new THREE.Mesh(footGeo, skinMat);
-    footR.position.set(0.07, 0.015, 0.02);
-    characterGroup.add(footR);
-
-    scene.add(characterGroup);
+    loader.load(modelUrl, (gltf) => {
+      model = gltf.scene;
+      model.scale.set(1.2, 1.2, 1.2);
+      model.position.y = 0;
+      scene.add(model);
+      status.textContent = 'Model geladen (CC0)';
+      updateCharacter();
+    }, undefined, (err) => {
+      status.textContent = 'Fout bij laden: ' + err.message;
+      console.error(err);
+    });
 
     function updateCharacter() {
+      if (!model) return;
       const b = parseFloat(document.getElementById('breast').value);
       const w = parseFloat(document.getElementById('waist').value);
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
 
-      bodyParts.breastL.scale.set(b, b * 0.85, b);
-      bodyParts.breastR.scale.set(b, b * 0.85, b);
-      bodyParts.waist.scale.x = w;
-      bodyParts.waist.scale.z = w;
-      bodyParts.hips.scale.x = h;
-      bodyParts.hips.scale.z = h * 0.9;
-      characterGroup.scale.y = ht;
+      model.scale.set(1.2 * (1 + (b-1)*0.15), 1.2 * ht, 1.2 * (1 + (h-1)*0.2));
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
