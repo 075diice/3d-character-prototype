@@ -19,6 +19,7 @@
       max-height: 40vh;
       overflow-y: auto;
       font-size: 14px;
+      z-index: 10;
     }
     .slider-row { display: flex; align-items: center; margin: 6px 0; gap: 8px; }
     .slider-row label { width: 80px; font-size: 13px; }
@@ -41,7 +42,7 @@
   <div id="container"></div>
   <div id="loading">Model laden...</div>
   <div id="ui" style="display:none;">
-    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v7</span></h3>
+    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v8</span></h3>
     <div id="debug" style="font-size:11px; color:#888; margin-bottom:6px;"></div>
     <div class="slider-row">
       <label>Borsten</label>
@@ -103,8 +104,9 @@
     renderer.domElement.style.position = 'absolute';
     renderer.domElement.style.top = '0';
     renderer.domElement.style.left = '0';
-    renderer.domElement.style.zIndex = '1';
-    container.appendChild(renderer.domElement);
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.zIndex = '0';
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
