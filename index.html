@@ -41,7 +41,7 @@
   <div id="container"></div>
   <div id="loading">Model laden...</div>
   <div id="ui" style="display:none;">
-    <h3>Naakte Vrouw - Procedureel</h3>
+    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v4</span></h3>
     <div class="slider-row">
       <label>Borsten</label>
       <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
@@ -137,83 +137,91 @@
 
       const skinMat = new THREE.MeshStandardMaterial({
         color: 0xf5d0b5,
-        roughness: 0.6,
-        metalness: 0.05
+        roughness: 0.5,
+        metalness: 0.0
       });
 
+      // TEST: bright red sphere so we know rendering works
+      const testSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.3, 16, 16),
+        new THREE.MeshStandardMaterial({ color: 0xff0000 })
+      );
+      testSphere.position.set(0, 1.2, 0);
+      characterGroup.add(testSphere);
+
       // Head
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 32), skinMat);
-      head.position.y = 1.65;
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 32, 32), skinMat);
+      head.position.y = 1.7;
       bodyParts.head = head;
       characterGroup.add(head);
 
       // Neck
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.12, 16), skinMat);
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.15, 16), skinMat);
       neck.position.y = 1.52;
       characterGroup.add(neck);
 
       // Torso
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.11, 0.45, 24), skinMat);
-      torso.position.y = 1.25;
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.55, 24), skinMat);
+      torso.position.y = 1.2;
       bodyParts.torso = torso;
       characterGroup.add(torso);
 
       // Breasts
-      const breastL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 24), skinMat);
-      breastL.position.set(-0.08, 1.32, 0.09);
+      const breastL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 24), skinMat);
+      breastL.position.set(-0.1, 1.28, 0.12);
       bodyParts.breastL = breastL;
       characterGroup.add(breastL);
 
-      const breastR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 24), skinMat);
-      breastR.position.set(0.08, 1.32, 0.09);
+      const breastR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 24), skinMat);
+      breastR.position.set(0.1, 1.28, 0.12);
       bodyParts.breastR = breastR;
       characterGroup.add(breastR);
 
-      // Waist / Hips
-      const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.25, 24), skinMat);
-      hips.position.y = 0.95;
+      // Hips
+      const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.3, 24), skinMat);
+      hips.position.y = 0.85;
       bodyParts.hips = hips;
       characterGroup.add(hips);
 
-      // Pelvis / crotch area (simple)
-      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), skinMat);
-      pelvis.position.y = 0.82;
+      // Pelvis
+      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 20), skinMat);
+      pelvis.position.y = 0.7;
       bodyParts.pelvis = pelvis;
       characterGroup.add(pelvis);
 
       // Arms
-      const armGeo = new THREE.CylinderGeometry(0.035, 0.03, 0.55, 12);
+      const armGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.65, 12);
       const armL = new THREE.Mesh(armGeo, skinMat);
-      armL.position.set(-0.22, 1.28, 0);
-      armL.rotation.z = 0.15;
+      armL.position.set(-0.28, 1.22, 0);
+      armL.rotation.z = 0.2;
       bodyParts.armL = armL;
       characterGroup.add(armL);
 
       const armR = new THREE.Mesh(armGeo, skinMat);
-      armR.position.set(0.22, 1.28, 0);
-      armR.rotation.z = -0.15;
+      armR.position.set(0.28, 1.22, 0);
+      armR.rotation.z = -0.2;
       bodyParts.armR = armR;
       characterGroup.add(armR);
 
       // Legs
-      const legGeo = new THREE.CylinderGeometry(0.055, 0.04, 0.8, 16);
+      const legGeo = new THREE.CylinderGeometry(0.07, 0.05, 0.9, 16);
       const legL = new THREE.Mesh(legGeo, skinMat);
-      legL.position.set(-0.08, 0.45, 0);
+      legL.position.set(-0.1, 0.35, 0);
       bodyParts.legL = legL;
       characterGroup.add(legL);
 
       const legR = new THREE.Mesh(legGeo, skinMat);
-      legR.position.set(0.08, 0.45, 0);
+      legR.position.set(0.1, 0.35, 0);
       bodyParts.legR = legR;
       characterGroup.add(legR);
 
       // Feet
-      const footGeo = new THREE.BoxGeometry(0.06, 0.03, 0.12);
+      const footGeo = new THREE.BoxGeometry(0.08, 0.04, 0.15);
       const footL = new THREE.Mesh(footGeo, skinMat);
-      footL.position.set(-0.08, 0.02, 0.03);
+      footL.position.set(-0.1, 0.02, 0.04);
       characterGroup.add(footL);
       const footR = new THREE.Mesh(footGeo, skinMat);
-      footR.position.set(0.08, 0.02, 0.03);
+      footR.position.set(0.1, 0.02, 0.04);
       characterGroup.add(footR);
 
       characterGroup.traverse(obj => {
@@ -227,7 +235,7 @@
       window.characterModel = characterGroup;
       
       // Make model much more visible
-      characterGroup.scale.set(1.8, 1.8, 1.8);
+      characterGroup.scale.set(1.5, 1.5, 1.5);
       characterGroup.position.y = 0;
     }
 
