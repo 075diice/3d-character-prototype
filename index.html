@@ -41,7 +41,7 @@
   <div id="container"></div>
   <div id="loading">Model laden...</div>
   <div id="ui" style="display:none;">
-    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v5</span></h3>
+    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v6</span></h3>
     <div id="debug" style="font-size:11px; color:#888; margin-bottom:6px;"></div>
     <div class="slider-row">
       <label>Borsten</label>
@@ -98,8 +98,8 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x1a1a2e, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -136,16 +136,14 @@
     function createNudeFemale() {
       characterGroup = new THREE.Group();
 
-      const skinMat = new THREE.MeshStandardMaterial({
-        color: 0xf5d0b5,
-        roughness: 0.5,
-        metalness: 0.0
+      const skinMat = new THREE.MeshBasicMaterial({
+        color: 0xf5d0b5
       });
 
       // TEST: bright red sphere so we know rendering works
       const testSphere = new THREE.Mesh(
         new THREE.SphereGeometry(0.3, 16, 16),
-        new THREE.MeshStandardMaterial({ color: 0xff0000 })
+        new THREE.MeshBasicMaterial({ color: 0xff0000 })
       );
       testSphere.position.set(0, 1.2, 0);
       characterGroup.add(testSphere);
@@ -153,7 +151,7 @@
       // Extra fallback: big green box
       const fallbackBox = new THREE.Mesh(
         new THREE.BoxGeometry(0.8, 1.6, 0.4),
-        new THREE.MeshStandardMaterial({ color: 0x00ff00 })
+        new THREE.MeshBasicMaterial({ color: 0x00ff00 })
       );
       fallbackBox.position.set(0, 0.8, 0);
       scene.add(fallbackBox);
