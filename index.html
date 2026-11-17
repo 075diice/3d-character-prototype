@@ -41,7 +41,8 @@
   <div id="container"></div>
   <div id="loading">Model laden...</div>
   <div id="ui" style="display:none;">
-    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v4</span></h3>
+    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v5</span></h3>
+    <div id="debug" style="font-size:11px; color:#888; margin-bottom:6px;"></div>
     <div class="slider-row">
       <label>Borsten</label>
       <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
@@ -149,6 +150,14 @@
       testSphere.position.set(0, 1.2, 0);
       characterGroup.add(testSphere);
 
+      // Extra fallback: big green box
+      const fallbackBox = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 1.6, 0.4),
+        new THREE.MeshStandardMaterial({ color: 0x00ff00 })
+      );
+      fallbackBox.position.set(0, 0.8, 0);
+      scene.add(fallbackBox);
+
       // Head
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 32, 32), skinMat);
       head.position.y = 1.7;
@@ -250,6 +259,15 @@
 
     // Extra strong light
     scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+
+    // Debug info
+    const debug = document.getElementById('debug');
+    debug.textContent = 'WebGL: ' + (renderer.capabilities.isWebGL2 ? 'WebGL2' : 'WebGL1') + 
+                        ' | Objects: ' + scene.children.length +
+                        ' | Camera: ' + camera.position.z.toFixed(1);
+
+    console.log('Scene children:', scene.children.length);
+    console.log('Renderer:', renderer);
 
     function updateCharacter() {
       const b = parseFloat(document.getElementById('breast').value);
