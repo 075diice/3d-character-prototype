@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>3D Character Prototype v2 - VRM</title>
+  <title>3D Character Prototype - Nude Female</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -129,46 +129,129 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    let vrm = null;
-    let currentScale = 1;
+    let characterGroup = null;
+    let bodyParts = {};
 
-    const loader = new GLTFLoader();
-    loader.register((parser) => new VRMLoaderPlugin(parser));
+    function createNudeFemale() {
+      characterGroup = new THREE.Group();
 
-    const modelUrl = 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb';
-
-    loader.load(modelUrl, (gltf) => {
-      const model = gltf.scene;
-      model.scale.set(1.8, 1.8, 1.8);
-      model.position.y = 0;
-      model.rotation.y = Math.PI;
-
-      model.traverse((obj) => {
-        obj.castShadow = true;
-        obj.receiveShadow = true;
+      const skinMat = new THREE.MeshStandardMaterial({
+        color: 0xf5d0b5,
+        roughness: 0.6,
+        metalness: 0.05
       });
 
-      scene.add(model);
-      window.characterModel = model;
+      // Head
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 32), skinMat);
+      head.position.y = 1.65;
+      bodyParts.head = head;
+      characterGroup.add(head);
 
-      loading.style.display = 'none';
-      ui.style.display = 'block';
+      // Neck
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.12, 16), skinMat);
+      neck.position.y = 1.52;
+      characterGroup.add(neck);
 
-      updateCharacter();
-    }, undefined, (err) => {
-      loading.textContent = 'Fout bij laden model: ' + err.message;
-      console.error(err);
-    });
+      // Torso
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.11, 0.45, 24), skinMat);
+      torso.position.y = 1.25;
+      bodyParts.torso = torso;
+      characterGroup.add(torso);
+
+      // Breasts
+      const breastL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 24), skinMat);
+      breastL.position.set(-0.08, 1.32, 0.09);
+      bodyParts.breastL = breastL;
+      characterGroup.add(breastL);
+
+      const breastR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 24), skinMat);
+      breastR.position.set(0.08, 1.32, 0.09);
+      bodyParts.breastR = breastR;
+      characterGroup.add(breastR);
+
+      // Waist / Hips
+      const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.25, 24), skinMat);
+      hips.position.y = 0.95;
+      bodyParts.hips = hips;
+      characterGroup.add(hips);
+
+      // Pelvis / crotch area (simple)
+      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), skinMat);
+      pelvis.position.y = 0.82;
+      bodyParts.pelvis = pelvis;
+      characterGroup.add(pelvis);
+
+      // Arms
+      const armGeo = new THREE.CylinderGeometry(0.035, 0.03, 0.55, 12);
+      const armL = new THREE.Mesh(armGeo, skinMat);
+      armL.position.set(-0.22, 1.28, 0);
+      armL.rotation.z = 0.15;
+      bodyParts.armL = armL;
+      characterGroup.add(armL);
+
+      const armR = new THREE.Mesh(armGeo, skinMat);
+      armR.position.set(0.22, 1.28, 0);
+      armR.rotation.z = -0.15;
+      bodyParts.armR = armR;
+      characterGroup.add(armR);
+
+      // Legs
+      const legGeo = new THREE.CylinderGeometry(0.055, 0.04, 0.8, 16);
+      const legL = new THREE.Mesh(legGeo, skinMat);
+      legL.position.set(-0.08, 0.45, 0);
+      bodyParts.legL = legL;
+      characterGroup.add(legL);
+
+      const legR = new THREE.Mesh(legGeo, skinMat);
+      legR.position.set(0.08, 0.45, 0);
+      bodyParts.legR = legR;
+      characterGroup.add(legR);
+
+      // Feet
+      const footGeo = new THREE.BoxGeometry(0.06, 0.03, 0.12);
+      const footL = new THREE.Mesh(footGeo, skinMat);
+      footL.position.set(-0.08, 0.02, 0.03);
+      characterGroup.add(footL);
+      const footR = new THREE.Mesh(footGeo, skinMat);
+      footR.position.set(0.08, 0.02, 0.03);
+      characterGroup.add(footR);
+
+      characterGroup.traverse(obj => {
+        if (obj.isMesh) {
+          obj.castShadow = true;
+          obj.receiveShadow = true;
+        }
+      });
+
+      scene.add(characterGroup);
+      window.characterModel = characterGroup;
+    }
+
+    createNudeFemale();
+    loading.style.display = 'none';
+    ui.style.display = 'block';
 
     function updateCharacter() {
-      const model = window.characterModel;
-      if (!model) return;
       const b = parseFloat(document.getElementById('breast').value);
       const w = parseFloat(document.getElementById('waist').value);
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
 
-      model.scale.set(1.5 * (1 + (b-1)*0.3), 1.5 * ht, 1.5 * (1 + (h-1)*0.3));
+      if (bodyParts.breastL) {
+        bodyParts.breastL.scale.set(b, b, b);
+        bodyParts.breastR.scale.set(b, b, b);
+      }
+      if (bodyParts.torso) {
+        bodyParts.torso.scale.x = w;
+        bodyParts.torso.scale.z = w;
+      }
+      if (bodyParts.hips) {
+        bodyParts.hips.scale.x = h;
+        bodyParts.hips.scale.z = h * 0.9;
+      }
+      if (characterGroup) {
+        characterGroup.scale.y = ht;
+      }
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
