@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>3D Character Prototype</title>
+  <title>3D Character Prototype v2 - VRM</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #111; color: #eee; overflow: hidden; }
+    body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
     #container { width: 100vw; height: 100vh; }
     #ui {
       position: absolute;
       bottom: 10px;
       left: 10px;
       right: 10px;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.8);
       padding: 12px;
       border-radius: 12px;
-      max-height: 45vh;
+      max-height: 40vh;
       overflow-y: auto;
       font-size: 14px;
     }
     .slider-row { display: flex; align-items: center; margin: 6px 0; gap: 8px; }
-    .slider-row label { width: 70px; font-size: 13px; }
+    .slider-row label { width: 80px; font-size: 13px; }
     .slider-row input[type=range] { flex: 1; }
     .slider-row span { width: 40px; text-align: right; font-size: 12px; }
     button {
@@ -34,35 +34,33 @@
       font-size: 14px;
     }
     h3 { margin-bottom: 8px; font-size: 16px; }
+    #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 18px; }
   </style>
 </head>
 <body>
   <div id="container"></div>
-  <div id="ui">
-    <h3>3D Character Prototype</h3>
+  <div id="loading">Model laden...</div>
+  <div id="ui" style="display:none;">
+    <h3>3D Character Prototype v2 (VRM)</h3>
     <div class="slider-row">
       <label>Borsten</label>
-      <input type="range" id="breast" min="0.5" max="2.5" step="0.05" value="1">
+      <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
       <span id="breastVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Taille</label>
-      <input type="range" id="waist" min="0.5" max="1.5" step="0.05" value="1">
+      <input type="range" id="waist" min="0.6" max="1.4" step="0.05" value="1">
       <span id="waistVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Heupen</label>
-      <input type="range" id="hips" min="0.7" max="2" step="0.05" value="1">
+      <input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1">
       <span id="hipsVal">1.0</span>
     </div>
     <div class="slider-row">
       <label>Lengte</label>
-      <input type="range" id="height" min="0.8" max="1.3" step="0.02" value="1">
+      <input type="range" id="height" min="0.8" max="1.2" step="0.02" value="1">
       <span id="heightVal">1.0</span>
-    </div>
-    <div class="slider-row">
-      <label>Huid</label>
-      <input type="color" id="skin" value="#f5c6a5">
     </div>
     <button id="poseBtn">Pose wisselen</button>
     <button id="resetBtn">Reset</button>
@@ -72,8 +70,9 @@
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@2.0.0/lib/three-vrm.module.js"
     }
   }
   </script>
@@ -81,37 +80,43 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 
     const container = document.getElementById('container');
+    const loading = document.getElementById('loading');
+    const ui = document.getElementById('ui');
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
-    scene.fog = new THREE.Fog(0x1a1a2e, 5, 15);
+    scene.fog = new THREE.Fog(0x1a1a2e, 8, 20);
 
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.2, 3.5);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.3, 2.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 1, 0);
+    controls.target.set(0, 1.1, 0);
     controls.enableDamping = true;
-    controls.minDistance = 1.5;
-    controls.maxDistance = 8;
+    controls.minDistance = 1.2;
+    controls.maxDistance = 6;
     controls.update();
 
     // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(3, 5, 2);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(2, 4, 2);
     dirLight.castShadow = true;
     scene.add(dirLight);
-    const rim = new THREE.DirectionalLight(0xffaacc, 0.4);
-    rim.position.set(-2, 3, -2);
+    const rim = new THREE.DirectionalLight(0xffaacc, 0.5);
+    rim.position.set(-2, 3, -1);
     scene.add(rim);
 
     // Ground
@@ -123,151 +128,62 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Character group
-    const character = new THREE.Group();
-    scene.add(character);
+    let vrm = null;
+    let currentScale = 1;
 
-    // Materials
-    const skinMat = new THREE.MeshStandardMaterial({
-      color: 0xf5c6a5,
-      roughness: 0.6,
-      metalness: 0.1
+    const loader = new GLTFLoader();
+    loader.register((parser) => new VRMLoaderPlugin(parser));
+
+    const modelUrl = 'https://cdn.jsdelivr.net/gh/pixiv/three-vrm@v2.0.0/packages/three-vrm/examples/models/VRM1_Constraint_Twist_Sample.vrm';
+
+    loader.load(modelUrl, (gltf) => {
+      vrm = gltf.userData.vrm;
+      VRMUtils.rotateVRM0(vrm); // For older VRM compatibility if needed
+
+      const model = vrm.scene;
+      model.traverse((obj) => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
+      scene.add(model);
+
+      loading.style.display = 'none';
+      ui.style.display = 'block';
+
+      updateCharacter();
+    }, undefined, (err) => {
+      loading.textContent = 'Fout bij laden model: ' + err.message;
+      console.error(err);
     });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 });
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-
-    // Body parts
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32), skinMat);
-    head.position.y = 1.65;
-    head.castShadow = true;
-    character.add(head);
-
-    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 32), hairMat);
-    hair.position.y = 1.72;
-    hair.scale.set(1, 0.85, 1);
-    character.add(hair);
-
-    const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), eyeMat);
-    leftEye.position.set(-0.08, 1.68, 0.18);
-    character.add(leftEye);
-    const rightEye = leftEye.clone();
-    rightEye.position.x = 0.08;
-    character.add(rightEye);
-
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.5, 24), skinMat);
-    torso.position.y = 1.25;
-    torso.castShadow = true;
-    character.add(torso);
-
-    // Breasts
-    const leftBreast = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 24), skinMat);
-    leftBreast.position.set(-0.12, 1.38, 0.12);
-    leftBreast.castShadow = true;
-    character.add(leftBreast);
-    const rightBreast = leftBreast.clone();
-    rightBreast.position.x = 0.12;
-    character.add(rightBreast);
-
-    const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.2, 24), skinMat);
-    waist.position.y = 0.95;
-    waist.castShadow = true;
-    character.add(waist);
-
-    const hips = new THREE.Mesh(new THREE.SphereGeometry(0.2, 24, 24), skinMat);
-    hips.position.y = 0.82;
-    hips.scale.set(1, 0.7, 0.8);
-    hips.castShadow = true;
-    character.add(hips);
-
-    // Legs
-    const leftThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.45, 16), skinMat);
-    leftThigh.position.set(-0.1, 0.5, 0);
-    leftThigh.castShadow = true;
-    character.add(leftThigh);
-    const rightThigh = leftThigh.clone();
-    rightThigh.position.x = 0.1;
-    character.add(rightThigh);
-
-    const leftCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.4, 16), skinMat);
-    leftCalf.position.set(-0.1, 0.15, 0);
-    leftCalf.castShadow = true;
-    character.add(leftCalf);
-    const rightCalf = leftCalf.clone();
-    rightCalf.position.x = 0.1;
-    character.add(rightCalf);
-
-    // Arms (simple)
-    const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.55, 12), skinMat);
-    leftArm.position.set(-0.28, 1.2, 0);
-    leftArm.rotation.z = 0.3;
-    leftArm.castShadow = true;
-    character.add(leftArm);
-    const rightArm = leftArm.clone();
-    rightArm.position.x = 0.28;
-    rightArm.rotation.z = -0.3;
-    character.add(rightArm);
-
-    // Store original scales
-    const parts = {
-      leftBreast, rightBreast, waist, hips, torso,
-      leftThigh, rightThigh, leftCalf, rightCalf
-    };
-
-    let pose = 0;
-    const poses = [
-      () => { // Neutral
-        leftArm.rotation.z = 0.3;
-        rightArm.rotation.z = -0.3;
-        leftArm.rotation.x = 0;
-        rightArm.rotation.x = 0;
-        leftThigh.rotation.x = 0;
-        rightThigh.rotation.x = 0;
-      },
-      () => { // Arms up
-        leftArm.rotation.z = 1.2;
-        rightArm.rotation.z = -1.2;
-        leftArm.rotation.x = -0.3;
-        rightArm.rotation.x = -0.3;
-      },
-      () => { // Legs apart
-        leftThigh.rotation.z = 0.4;
-        rightThigh.rotation.z = -0.4;
-        leftThigh.rotation.x = 0.2;
-        rightThigh.rotation.x = 0.2;
-      }
-    ];
 
     function updateCharacter() {
+      if (!vrm) return;
       const b = parseFloat(document.getElementById('breast').value);
       const w = parseFloat(document.getElementById('waist').value);
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
-      const skinColor = document.getElementById('skin').value;
 
-      leftBreast.scale.set(b, b, b);
-      rightBreast.scale.set(b, b, b);
-      waist.scale.set(w, 1, w * 0.9);
-      hips.scale.set(h, 0.7, h * 0.8);
-      torso.scale.set(1 + (b-1)*0.15, 1, 1 + (b-1)*0.1);
-      character.scale.set(1, ht, 1);
+      // Simple scale-based morph approximation (real morphs would use blendshapes)
+      vrm.scene.scale.set(1, ht, 1);
 
-      skinMat.color.set(skinColor);
-
+      // Rough body adjustment via scale on specific bones if available
+      // For demo we keep it simple
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
       document.getElementById('hipsVal').textContent = h.toFixed(1);
       document.getElementById('heightVal').textContent = ht.toFixed(2);
     }
 
-    // Events
-    ['breast','waist','hips','height'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updateCharacter);
-    });
-    document.getElementById('skin').addEventListener('input', updateCharacter);
+    let poseIndex = 0;
+    const poses = [
+      () => { if (vrm) vrm.humanoid.resetPose(); },
+      () => { if (vrm) { vrm.humanoid.getNormalizedBoneNode('leftUpperArm').rotation.z = 1.2; vrm.humanoid.getNormalizedBoneNode('rightUpperArm').rotation.z = -1.2; } },
+      () => { if (vrm) { vrm.humanoid.getNormalizedBoneNode('leftUpperLeg').rotation.z = 0.3; vrm.humanoid.getNormalizedBoneNode('rightUpperLeg').rotation.z = -0.3; } }
+    ];
 
     document.getElementById('poseBtn').addEventListener('click', () => {
-      pose = (pose + 1) % poses.length;
-      poses[pose]();
+      poseIndex = (poseIndex + 1) % poses.length;
+      poses[poseIndex]();
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
@@ -275,27 +191,28 @@
       document.getElementById('waist').value = 1;
       document.getElementById('hips').value = 1;
       document.getElementById('height').value = 1;
-      document.getElementById('skin').value = '#f5c6a5';
-      pose = 0;
-      poses[0]();
+      poseIndex = 0;
+      if (vrm) vrm.humanoid.resetPose();
       updateCharacter();
     });
 
-    // Resize
+    ['breast','waist','hips','height'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateCharacter);
+    });
+
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
+      if (vrm) vrm.update(0.016);
       controls.update();
       renderer.render(scene, camera);
     }
     animate();
-    updateCharacter();
   </script>
 </body>
 </html>
