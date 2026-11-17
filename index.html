@@ -2,345 +2,46 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>3D Character Prototype - Nude Female</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>v9 TEST</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
-    #container { width: 100vw; height: 100vh; position: relative; }
-    #ui {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.8);
-      padding: 12px;
-      border-radius: 12px;
-      max-height: 40vh;
-      overflow-y: auto;
-      font-size: 14px;
-      z-index: 10;
-    }
-    .slider-row { display: flex; align-items: center; margin: 6px 0; gap: 8px; }
-    .slider-row label { width: 80px; font-size: 13px; }
-    .slider-row input[type=range] { flex: 1; }
-    .slider-row span { width: 40px; text-align: right; font-size: 12px; }
-    button {
-      background: #e91e63;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      margin: 4px;
-      font-size: 14px;
-    }
-    h3 { margin-bottom: 8px; font-size: 16px; }
-    #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 18px; }
+    * { margin: 0; padding: 0; }
+    body { background: #000; overflow: hidden; }
+    #ui { position: absolute; bottom: 10px; left: 10px; color: white; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; z-index: 100; }
   </style>
 </head>
 <body>
-  <div id="container"></div>
-  <div id="loading">Model laden...</div>
-  <div id="ui" style="display:none;">
-    <h3>Naakte Vrouw - Procedureel <span id="version" style="color:#e91e63;">v8</span></h3>
-    <div id="debug" style="font-size:11px; color:#888; margin-bottom:6px;"></div>
-    <div class="slider-row">
-      <label>Borsten</label>
-      <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
-      <span id="breastVal">1.0</span>
-    </div>
-    <div class="slider-row">
-      <label>Taille</label>
-      <input type="range" id="waist" min="0.6" max="1.4" step="0.05" value="1">
-      <span id="waistVal">1.0</span>
-    </div>
-    <div class="slider-row">
-      <label>Heupen</label>
-      <input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1">
-      <span id="hipsVal">1.0</span>
-    </div>
-    <div class="slider-row">
-      <label>Lengte</label>
-      <input type="range" id="height" min="0.8" max="1.2" step="0.02" value="1">
-      <span id="heightVal">1.0</span>
-    </div>
-    <button id="poseBtn">Pose wisselen</button>
-    <button id="resetBtn">Reset</button>
-    <p style="margin-top:8px; font-size:12px; opacity:0.7;">Sleep om te draaien • Pinch om te zoomen</p>
-  </div>
-
+  <div id="ui"><h3>v9 TEST - Rode bol</h3><p id="status">Laden...</p></div>
   <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-      "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@2.0.0/lib/three-vrm.module.js"
-    }
-  }
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
   </script>
-
   <script type="module">
     import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
-
-    const container = document.getElementById('container');
-    const loading = document.getElementById('loading');
-    const ui = document.getElementById('ui');
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
-    scene.fog = new THREE.Fog(0x1a1a2e, 8, 20);
-
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.3, 2.8);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x1a1a2e, 1);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.domElement.style.position = 'absolute';
-    renderer.domElement.style.top = '0';
-    renderer.domElement.style.left = '0';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    renderer.domElement.style.zIndex = '0';
-    container.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 1.1, 0);
-    controls.enableDamping = true;
-    controls.minDistance = 1.2;
-    controls.maxDistance = 6;
-    controls.update();
-
-    // Lights - extreem sterk zodat het model altijd zichtbaar is
-    scene.add(new THREE.AmbientLight(0xffffff, 2.0));
-    const key = new THREE.DirectionalLight(0xffffff, 3.0);
-    key.position.set(5, 8, 5);
-    scene.add(key);
-    const fill = new THREE.DirectionalLight(0xffffff, 1.5);
-    fill.position.set(-5, 5, 3);
-    scene.add(fill);
-    const back = new THREE.DirectionalLight(0xffccaa, 1.0);
-    back.position.set(0, 3, -5);
-    scene.add(back);
-
-    // Ground
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(20, 20),
-      new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.8 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    let characterGroup = null;
-    let bodyParts = {};
-
-    function createNudeFemale() {
-      characterGroup = new THREE.Group();
-
-      const skinMat = new THREE.MeshBasicMaterial({
-        color: 0xf5d0b5
-      });
-
-      // TEST: bright red sphere so we know rendering works
-      const testSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.3, 16, 16),
+    const status = document.getElementById('status');
+    try {
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111122);
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+      camera.position.z = 3;
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x111122);
+      document.body.appendChild(renderer.domElement);
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 32, 32),
         new THREE.MeshBasicMaterial({ color: 0xff0000 })
       );
-      testSphere.position.set(0, 1.2, 0);
-      characterGroup.add(testSphere);
-
-      // Extra fallback: big green box
-      const fallbackBox = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 1.6, 0.4),
-        new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-      );
-      fallbackBox.position.set(0, 0.8, 0);
-      scene.add(fallbackBox);
-
-      // Head
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 32, 32), skinMat);
-      head.position.y = 1.7;
-      bodyParts.head = head;
-      characterGroup.add(head);
-
-      // Neck
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.15, 16), skinMat);
-      neck.position.y = 1.52;
-      characterGroup.add(neck);
-
-      // Torso
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.55, 24), skinMat);
-      torso.position.y = 1.2;
-      bodyParts.torso = torso;
-      characterGroup.add(torso);
-
-      // Breasts
-      const breastL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 24), skinMat);
-      breastL.position.set(-0.1, 1.28, 0.12);
-      bodyParts.breastL = breastL;
-      characterGroup.add(breastL);
-
-      const breastR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 24), skinMat);
-      breastR.position.set(0.1, 1.28, 0.12);
-      bodyParts.breastR = breastR;
-      characterGroup.add(breastR);
-
-      // Hips
-      const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.3, 24), skinMat);
-      hips.position.y = 0.85;
-      bodyParts.hips = hips;
-      characterGroup.add(hips);
-
-      // Pelvis
-      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 20), skinMat);
-      pelvis.position.y = 0.7;
-      bodyParts.pelvis = pelvis;
-      characterGroup.add(pelvis);
-
-      // Arms
-      const armGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.65, 12);
-      const armL = new THREE.Mesh(armGeo, skinMat);
-      armL.position.set(-0.28, 1.22, 0);
-      armL.rotation.z = 0.2;
-      bodyParts.armL = armL;
-      characterGroup.add(armL);
-
-      const armR = new THREE.Mesh(armGeo, skinMat);
-      armR.position.set(0.28, 1.22, 0);
-      armR.rotation.z = -0.2;
-      bodyParts.armR = armR;
-      characterGroup.add(armR);
-
-      // Legs
-      const legGeo = new THREE.CylinderGeometry(0.07, 0.05, 0.9, 16);
-      const legL = new THREE.Mesh(legGeo, skinMat);
-      legL.position.set(-0.1, 0.35, 0);
-      bodyParts.legL = legL;
-      characterGroup.add(legL);
-
-      const legR = new THREE.Mesh(legGeo, skinMat);
-      legR.position.set(0.1, 0.35, 0);
-      bodyParts.legR = legR;
-      characterGroup.add(legR);
-
-      // Feet
-      const footGeo = new THREE.BoxGeometry(0.08, 0.04, 0.15);
-      const footL = new THREE.Mesh(footGeo, skinMat);
-      footL.position.set(-0.1, 0.02, 0.04);
-      characterGroup.add(footL);
-      const footR = new THREE.Mesh(footGeo, skinMat);
-      footR.position.set(0.1, 0.02, 0.04);
-      characterGroup.add(footR);
-
-      characterGroup.traverse(obj => {
-        if (obj.isMesh) {
-          obj.castShadow = true;
-          obj.receiveShadow = true;
-        }
-      });
-
-      scene.add(characterGroup);
-      window.characterModel = characterGroup;
-      
-      // Make model much more visible
-      characterGroup.scale.set(1.5, 1.5, 1.5);
-      characterGroup.position.y = 0;
+      scene.add(sphere);
+      function animate() {
+        requestAnimationFrame(animate);
+        sphere.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+      status.textContent = 'WebGL OK - rode bol moet zichtbaar zijn';
+    } catch(e) {
+      status.textContent = 'FOUT: ' + e.message;
     }
-
-    createNudeFemale();
-    loading.style.display = 'none';
-    ui.style.display = 'block';
-
-    // Force camera to look at the model
-    camera.position.set(0, 1.0, 2.2);
-    controls.target.set(0, 1.1, 0);
-    controls.update();
-
-    // Extra strong light
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-
-    // Debug info
-    const debug = document.getElementById('debug');
-    debug.textContent = 'WebGL: ' + (renderer.capabilities.isWebGL2 ? 'WebGL2' : 'WebGL1') + 
-                        ' | Objects: ' + scene.children.length +
-                        ' | Camera: ' + camera.position.z.toFixed(1);
-
-    console.log('Scene children:', scene.children.length);
-    console.log('Renderer:', renderer);
-
-    function updateCharacter() {
-      const b = parseFloat(document.getElementById('breast').value);
-      const w = parseFloat(document.getElementById('waist').value);
-      const h = parseFloat(document.getElementById('hips').value);
-      const ht = parseFloat(document.getElementById('height').value);
-
-      if (bodyParts.breastL) {
-        bodyParts.breastL.scale.set(b, b, b);
-        bodyParts.breastR.scale.set(b, b, b);
-      }
-      if (bodyParts.torso) {
-        bodyParts.torso.scale.x = w;
-        bodyParts.torso.scale.z = w;
-      }
-      if (bodyParts.hips) {
-        bodyParts.hips.scale.x = h;
-        bodyParts.hips.scale.z = h * 0.9;
-      }
-      if (characterGroup) {
-        characterGroup.scale.y = ht;
-      }
-
-      document.getElementById('breastVal').textContent = b.toFixed(1);
-      document.getElementById('waistVal').textContent = w.toFixed(1);
-      document.getElementById('hipsVal').textContent = h.toFixed(1);
-      document.getElementById('heightVal').textContent = ht.toFixed(2);
-    }
-
-    let poseIndex = 0;
-    const poses = [
-      () => { if (vrm) vrm.humanoid.resetPose(); },
-      () => { if (vrm) { vrm.humanoid.getNormalizedBoneNode('leftUpperArm').rotation.z = 1.2; vrm.humanoid.getNormalizedBoneNode('rightUpperArm').rotation.z = -1.2; } },
-      () => { if (vrm) { vrm.humanoid.getNormalizedBoneNode('leftUpperLeg').rotation.z = 0.3; vrm.humanoid.getNormalizedBoneNode('rightUpperLeg').rotation.z = -0.3; } }
-    ];
-
-    document.getElementById('poseBtn').addEventListener('click', () => {
-      poseIndex = (poseIndex + 1) % poses.length;
-      poses[poseIndex]();
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      document.getElementById('breast').value = 1;
-      document.getElementById('waist').value = 1;
-      document.getElementById('hips').value = 1;
-      document.getElementById('height').value = 1;
-      poseIndex = 0;
-      if (vrm) vrm.humanoid.resetPose();
-      updateCharacter();
-    });
-
-    ['breast','waist','hips','height'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updateCharacter);
-    });
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (vrm) vrm.update(0.016);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
   </script>
 </body>
 </html>
