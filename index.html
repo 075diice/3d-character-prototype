@@ -41,7 +41,7 @@
   <div id="container"></div>
   <div id="loading">Model laden...</div>
   <div id="ui" style="display:none;">
-    <h3>3D Character Prototype v2 (VRM)</h3>
+    <h3>Naakte Vrouw - Procedureel</h3>
     <div class="slider-row">
       <label>Borsten</label>
       <input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1">
@@ -230,7 +230,14 @@
     createNudeFemale();
     loading.style.display = 'none';
     ui.style.display = 'block';
-    // force update 2026
+
+    // Force camera to look at the model
+    camera.position.set(0, 1.2, 3.5);
+    controls.target.set(0, 1.0, 0);
+    controls.update();
+
+    // Add a visible light helper temporarily if needed
+    console.log('Nude female model created');
 
     function updateCharacter() {
       const b = parseFloat(document.getElementById('breast').value);
