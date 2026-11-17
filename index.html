@@ -108,21 +108,17 @@
     controls.maxDistance = 6;
     controls.update();
 
-    // Lights - veel sterker voor zichtbaarheid
-    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
-    scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-    dirLight.position.set(3, 5, 3);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-    const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.0);
-    dirLight2.position.set(-3, 4, -2);
-    scene.add(dirLight2);
-    const rim = new THREE.DirectionalLight(0xffaacc, 0.8);
-    rim.position.set(-2, 3, -1);
-    scene.add(rim);
-    const fill = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+    // Lights - extreem sterk zodat het model altijd zichtbaar is
+    scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+    const key = new THREE.DirectionalLight(0xffffff, 3.0);
+    key.position.set(5, 8, 5);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xffffff, 1.5);
+    fill.position.set(-5, 5, 3);
     scene.add(fill);
+    const back = new THREE.DirectionalLight(0xffccaa, 1.0);
+    back.position.set(0, 3, -5);
+    scene.add(back);
 
     // Ground
     const ground = new THREE.Mesh(
@@ -143,26 +139,31 @@
 
     loader.load(modelUrl, (gltf) => {
       vrm = gltf.userData.vrm;
-      // VRMUtils.rotateVRM0(vrm); // only for VRM0
 
       const model = vrm.scene;
+      model.rotation.y = Math.PI; // draai model naar camera
+      model.position.y = 0;       // op de grond zetten
+
       model.traverse((obj) => {
         obj.castShadow = true;
         obj.receiveShadow = true;
         if (obj.isMesh && obj.material) {
-          // Force materials to be visible
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach(m => {
-              m.side = THREE.DoubleSide;
-              if (m.emissive) m.emissive.set(0x111111);
-            });
-          } else {
-            obj.material.side = THREE.DoubleSide;
-            if (obj.material.emissive) obj.material.emissive.set(0x111111);
-          }
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach(m => {
+            m.side = THREE.DoubleSide;
+            m.emissive = new THREE.Color(0x333333);
+            m.emissiveIntensity = 0.3;
+            if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+          });
         }
       });
+
       scene.add(model);
+
+      // Camera beter richten
+      controls.target.set(0, 1.0, 0);
+      camera.position.set(0, 1.4, 3.2);
+      controls.update();
 
       loading.style.display = 'none';
       ui.style.display = 'block';
