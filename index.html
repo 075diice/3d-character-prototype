@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v13</title>
+  <title>Naakte Vrouw Prototype v14</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -39,7 +39,7 @@
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v13</span></h3>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v14</span></h3>
     <div id="status">Model laden...</div>
     <div class="slider-row">
       <label>Borsten</label>
@@ -102,16 +102,15 @@
     const status = document.getElementById('status');
 
     const loader = new GLTFLoader();
-    // Known working public GLB (CesiumMan as fallback, but try a better one)
-    const modelUrl = 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb';
+    // Female supermodel GLB from GitHub
+    const modelUrl = 'https://raw.githubusercontent.com/MickMickMick73/godot-meshy-supermodel-biped/main/Meshy_AI_A_female_supermodel_i_biped_Animation_Walking_withSkin.glb';
 
     loader.load(modelUrl, (gltf) => {
       model = gltf.scene;
-      model.scale.set(1.5, 1.5, 1.5);
+      model.scale.set(1.0, 1.0, 1.0);
       model.position.y = 0;
-      model.rotation.y = Math.PI;
       scene.add(model);
-      status.textContent = 'Model geladen';
+      status.textContent = 'Vrouwelijk model geladen';
       updateCharacter();
     }, undefined, (err) => {
       status.textContent = 'Fout: ' + err.message;
@@ -125,7 +124,7 @@
       const h = parseFloat(document.getElementById('hips').value);
       const ht = parseFloat(document.getElementById('height').value);
 
-      model.scale.set(1.5 * (1 + (b-1)*0.2), 1.5 * ht, 1.5 * (1 + (h-1)*0.2));
+      model.scale.set(1.0 * (1 + (b-1)*0.15), 1.0 * ht, 1.0 * (1 + (h-1)*0.15));
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
