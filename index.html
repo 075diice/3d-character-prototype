@@ -3,33 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v17</title>
+  <title>Naakte Vrouw Prototype v18</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
     #ui {
-      position: absolute; bottom: 10px; left: 10px; right: 10px;
-      background: rgba(0,0,0,0.88); padding: 14px; border-radius: 14px;
-      max-height: 48vh; overflow-y: auto; font-size: 14px; z-index: 100;
+      position: absolute; bottom: 12px; left: 12px; right: 12px;
+      background: rgba(10,10,18,0.92); padding: 16px; border-radius: 16px;
+      max-height: 50vh; overflow-y: auto; font-size: 14px; z-index: 100;
+      backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
     }
-    .slider-row { display: flex; align-items: center; margin: 7px 0; gap: 10px; }
-    .slider-row label { width: 90px; }
-    .slider-row input[type=range] { flex: 1; accent-color: #e91e63; }
-    .slider-row span { width: 42px; text-align: right; }
-    button { background: #e91e63; color: white; border: none; padding: 10px 16px; border-radius: 10px; margin-top: 6px; }
-    h3 { margin-bottom: 6px; }
+    .slider-row { display: flex; align-items: center; margin: 8px 0; gap: 12px; }
+    .slider-row label { width: 80px; font-weight: 500; }
+    .slider-row input[type=range] { flex: 1; accent-color: #e91e63; height: 6px; }
+    .slider-row span { width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+    button {
+      background: #e91e63; color: white; border: none; padding: 12px 20px;
+      border-radius: 12px; margin-top: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    h3 { margin-bottom: 4px; font-size: 18px; }
+    #status { font-size: 12px; color: #aaa; margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v17</span></h3>
-    <div id="status">Realistisch CC0 model laden...</div>
-    <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.6" max="1.8" step="0.05" value="1"><span id="breastVal">1.0</span></div>
-    <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.7" max="1.4" step="0.05" value="1"><span id="waistVal">1.0</span></div>
-    <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.7" max="1.6" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
-    <div class="slider-row"><label>Lengte</label><input type="range" id="height" min="0.85" max="1.15" step="0.02" value="1"><span id="heightVal">1.00</span></div>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v18</span></h3>
+    <div id="status">Procedureel naakt model (sliders werken)</div>
+    <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1"><span id="breastVal">1.0</span></div>
+    <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.6" max="1.5" step="0.05" value="1"><span id="waistVal">1.0</span></div>
+    <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
+    <div class="slider-row"><label>Lengte</label><input type="range" id="height" min="0.85" max="1.2" step="0.02" value="1"><span id="heightVal">1.00</span></div>
     <button id="resetBtn">Reset</button>
-    <p style="margin-top:10px; font-size:12px; opacity:0.65;">Sleep om te draaien · Pinch om te zoomen</p>
+    <p style="margin-top:12px; font-size:12px; opacity:0.6;">Sleep om te draaien · Pinch om te zoomen</p>
   </div>
   <script type="importmap">
   { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
@@ -37,77 +42,171 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x12121f);
-    const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 100);
-    camera.position.set(0, 1.2, 3.2);
+    const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 100);
+    camera.position.set(0, 1.15, 3.4);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(innerWidth, innerHeight);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
+
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.9, 0);
+    controls.target.set(0, 0.95, 0);
     controls.enableDamping = true;
-    controls.minDistance = 1.2;
-    controls.maxDistance = 8;
+    controls.minDistance = 1.4;
+    controls.maxDistance = 7;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const key = new THREE.DirectionalLight(0xffffff, 1.2);
-    key.position.set(2.5, 4, 2);
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    const key = new THREE.DirectionalLight(0xfff5ee, 1.4);
+    key.position.set(2.2, 4.5, 2.5);
     key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xaaaaff, 0.35);
-    fill.position.set(-2, 2, -1);
+    const fill = new THREE.DirectionalLight(0xaaccff, 0.4);
+    fill.position.set(-2.5, 2, -1);
     scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffaa88, 0.25);
+    rim.position.set(0, 2, -3);
+    scene.add(rim);
 
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 12),
-      new THREE.MeshStandardMaterial({ color: 0x1a1a28, roughness: 0.9 })
+      new THREE.PlaneGeometry(14, 14),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a28, roughness: 0.85 })
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = 0;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    let model;
-    const loader = new GLTFLoader();
-    loader.load(
-      'https://raw.githubusercontent.com/075diice/3d-character-prototype/main/models/female-base.glb',
-      (gltf) => {
-        model = gltf.scene;
-        model.scale.set(1, 1, 1);
-        model.position.y = 0;
-        model.traverse(c => {
-          if (c.isMesh) {
-            c.castShadow = true;
-            c.receiveShadow = true;
-            if (c.material) c.material.roughness = 0.6;
-          }
-        });
-        scene.add(model);
-        document.getElementById('status').textContent = 'Realistisch CC0 model geladen (Innerscene)';
-        updateCharacter();
-      },
-      undefined,
-      (err) => {
-        document.getElementById('status').textContent = 'Fout bij laden model: ' + err.message;
-        console.error(err);
+    // Skin material
+    const skin = new THREE.MeshStandardMaterial({
+      color: 0xf0c8a0,
+      roughness: 0.55,
+      metalness: 0.0,
+      flatShading: false
+    });
+
+    const body = new THREE.Group();
+    scene.add(body);
+
+    // Head
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 32, 24), skin);
+    head.position.y = 1.58;
+    head.scale.set(1, 1.08, 0.95);
+    body.add(head);
+
+    // Neck
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.12, 16), skin);
+    neck.position.y = 1.42;
+    body.add(neck);
+
+    // Chest / upper torso
+    const chest = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 24), skin);
+    chest.position.y = 1.22;
+    chest.scale.set(1.15, 0.85, 0.7);
+    body.add(chest);
+
+    // Breasts (separate so they can scale independently)
+    const leftBreast = new THREE.Mesh(new THREE.SphereGeometry(0.085, 28, 20), skin);
+    leftBreast.position.set(-0.09, 1.18, 0.07);
+    leftBreast.name = 'leftBreast';
+    body.add(leftBreast);
+
+    const rightBreast = new THREE.Mesh(new THREE.SphereGeometry(0.085, 28, 20), skin);
+    rightBreast.position.set(0.09, 1.18, 0.07);
+    rightBreast.name = 'rightBreast';
+    body.add(rightBreast);
+
+    // Waist
+    const waist = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 0.22, 20), skin);
+    waist.position.y = 1.02;
+    waist.name = 'waist';
+    body.add(waist);
+
+    // Hips / pelvis
+    const hips = new THREE.Mesh(new THREE.SphereGeometry(0.15, 32, 24), skin);
+    hips.position.y = 0.82;
+    hips.scale.set(1.2, 0.7, 0.85);
+    hips.name = 'hips';
+    body.add(hips);
+
+    // Buttocks
+    const butt = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 18), skin);
+    butt.position.set(0, 0.78, -0.06);
+    butt.scale.set(1.1, 0.8, 0.9);
+    body.add(butt);
+
+    // Arms
+    function makeArm(side) {
+      const group = new THREE.Group();
+      const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.28, 12), skin);
+      upper.position.y = -0.14;
+      group.add(upper);
+      const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.022, 0.26, 12), skin);
+      lower.position.y = -0.42;
+      group.add(lower);
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 10), skin);
+      hand.position.y = -0.58;
+      group.add(hand);
+      group.position.set(side * 0.28, 1.28, 0);
+      group.rotation.z = side * 0.15;
+      return group;
+    }
+    body.add(makeArm(-1));
+    body.add(makeArm(1));
+
+    // Legs
+    function makeLeg(side) {
+      const group = new THREE.Group();
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.42, 16), skin);
+      thigh.position.y = -0.21;
+      group.add(thigh);
+      const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.035, 0.38, 14), skin);
+      calf.position.y = -0.62;
+      group.add(calf);
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.04, 0.16), skin);
+      foot.position.set(0, -0.82, 0.03);
+      group.add(foot);
+      group.position.set(side * 0.08, 0.68, 0);
+      return group;
+    }
+    body.add(makeLeg(-1));
+    body.add(makeLeg(1));
+
+    // Enable shadows on all
+    body.traverse(c => {
+      if (c.isMesh) {
+        c.castShadow = true;
+        c.receiveShadow = true;
       }
-    );
+    });
 
     function updateCharacter() {
-      if (!model) return;
       const b = +document.getElementById('breast').value;
       const w = +document.getElementById('waist').value;
       const h = +document.getElementById('hips').value;
       const ht = +document.getElementById('height').value;
-      // Simple whole-body proportional scale for now (better than nothing)
-      model.scale.set(1 + (b-1)*0.08, ht, 1 + (h-1)*0.12);
-      model.position.y = (ht - 1) * 0.05;
+
+      // Breasts
+      leftBreast.scale.set(b, b * 0.95, b * 0.85);
+      rightBreast.scale.set(b, b * 0.95, b * 0.85);
+
+      // Waist (scale x/z)
+      waist.scale.set(w, 1, w * 0.95);
+
+      // Hips
+      hips.scale.set(1.2 * h, 0.7, 0.85 * h);
+      butt.scale.set(1.1 * h * 0.95, 0.8, 0.9 * h);
+
+      // Overall height
+      body.scale.y = ht;
+      body.position.y = (ht - 1) * 0.15;
+
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
       document.getElementById('hipsVal').textContent = h.toFixed(1);
@@ -119,13 +218,20 @@
       updateCharacter();
     };
     ['breast','waist','hips','height'].forEach(id => document.getElementById(id).oninput = updateCharacter);
+    updateCharacter();
 
     window.onresize = () => {
       camera.aspect = innerWidth / innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
     };
-    (function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); })();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
   </script>
 </body>
 </html>
