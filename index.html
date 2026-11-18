@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v20</title>
+  <title>Naakte Vrouw Prototype v22</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -27,12 +27,12 @@
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v20</span></h3>
-    <div id="status">Laden... Superhero Female + textures</div>
-    <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1"><span id="breastVal">1.0</span></div>
-    <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.6" max="1.5" step="0.05" value="1"><span id="waistVal">1.0</span></div>
-    <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
-    <div class="slider-row"><label>Lengte</label><input type="range" id="height" min="0.85" max="1.2" step="0.02" value="1"><span id="heightVal">1.00</span></div>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v22</span></h3>
+    <div id="status">Sliders actief (proportioneel)</div>
+    <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.4" max="2.2" step="0.05" value="1"><span id="breastVal">1.0</span></div>
+    <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.5" max="1.6" step="0.05" value="1"><span id="waistVal">1.0</span></div>
+    <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.6" max="2.0" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
+    <div class="slider-row"><label>Lengte</label><input type="range" id="height" min="0.8" max="1.25" step="0.02" value="1"><span id="heightVal">1.00</span></div>
     <button id="resetBtn">Reset</button>
     <p style="margin-top:12px; font-size:12px; opacity:0.6;">Sleep om te draaien · Pinch om te zoomen</p>
   </div>
@@ -96,7 +96,7 @@
         }
       });
       scene.add(model);
-      status.textContent = 'Superhero Female + textures geladen';
+      status.textContent = 'Sliders actief (proportioneel)';
       updateCharacter();
     }, undefined, (err) => {
       console.error(err);
@@ -110,11 +110,16 @@
       const h = +document.getElementById('hips').value;
       const ht = +document.getElementById('height').value;
 
-      const scaleX = 1 + (b - 1) * 0.15 + (h - 1) * 0.1;
+      // Stronger, more differentiated scaling
+      // Breasts: strong X + some Z
+      // Waist: mainly X (narrower/wider)
+      // Hips: strong Z + some X
+      // Height: Y
+      const scaleX = 1 + (b - 1) * 0.28 + (w - 1) * 0.22 + (h - 1) * 0.10;
       const scaleY = ht;
-      const scaleZ = 1 + (b - 1) * 0.1 + (h - 1) * 0.15;
+      const scaleZ = 1 + (b - 1) * 0.12 + (h - 1) * 0.32 + (w - 1) * 0.08;
       model.scale.set(scaleX, scaleY, scaleZ);
-      model.position.y = (ht - 1) * 0.3;
+      model.position.y = (ht - 1) * 0.35;
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
