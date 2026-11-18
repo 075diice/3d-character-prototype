@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v19</title>
+  <title>Naakte Vrouw Prototype v20</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -27,8 +27,8 @@
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v19</span></h3>
-    <div id="status">Laden... Superhero Female (Quaternius)</div>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v20</span></h3>
+    <div id="status">Laden... Superhero Female + textures</div>
     <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1"><span id="breastVal">1.0</span></div>
     <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.6" max="1.5" step="0.05" value="1"><span id="waistVal">1.0</span></div>
     <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
@@ -62,14 +62,13 @@
     controls.maxDistance = 8;
     controls.update();
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const key = new THREE.DirectionalLight(0xfff5ee, 1.3);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xfff5ee, 1.2);
     key.position.set(2.5, 5, 3);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xaaccff, 0.35);
+    const fill = new THREE.DirectionalLight(0xaaccff, 0.3);
     fill.position.set(-3, 2.5, -1);
     scene.add(fill);
 
@@ -81,13 +80,6 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Skin material (textures missing)
-    const skinMat = new THREE.MeshStandardMaterial({
-      color: 0xf0c8a0,
-      roughness: 0.5,
-      metalness: 0.0
-    });
-
     let model = null;
     const status = document.getElementById('status');
     const loader = new GLTFLoader();
@@ -97,22 +89,18 @@
       model = gltf.scene;
       model.scale.set(1, 1, 1);
       model.position.y = 0;
-      // Apply skin material to body meshes (textures not uploaded)
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
-          if (child.name === 'Superhero_Female' || child.material) {
-            child.material = skinMat;
-          }
         }
       });
       scene.add(model);
-      status.textContent = 'Superhero Female geladen (Quaternius, zonder textures)';
+      status.textContent = 'Superhero Female + textures geladen';
       updateCharacter();
     }, undefined, (err) => {
       console.error(err);
-      status.textContent = 'Fout bij laden model: ' + err.message;
+      status.textContent = 'Fout bij laden: ' + (err.message || err);
     });
 
     function updateCharacter() {
@@ -122,7 +110,6 @@
       const h = +document.getElementById('hips').value;
       const ht = +document.getElementById('height').value;
 
-      // Simple overall scaling for now (single mesh)
       const scaleX = 1 + (b - 1) * 0.15 + (h - 1) * 0.1;
       const scaleY = ht;
       const scaleZ = 1 + (b - 1) * 0.1 + (h - 1) * 0.15;
