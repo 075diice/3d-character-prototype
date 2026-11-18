@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Naakte Vrouw Prototype v20</title>
+  <title>Naakte Vrouw Prototype v21</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a12; color: #eee; overflow: hidden; }
@@ -27,8 +27,8 @@
 </head>
 <body>
   <div id="ui">
-    <h3>Naakte Vrouw <span style="color:#e91e63;">v20</span></h3>
-    <div id="status">Laden... Superhero Female + textures</div>
+    <h3>Naakte Vrouw <span style="color:#e91e63;">v21</span></h3>
+    <div id="status">Laden... realistischer model + haar</div>
     <div class="slider-row"><label>Borsten</label><input type="range" id="breast" min="0.5" max="2.0" step="0.05" value="1"><span id="breastVal">1.0</span></div>
     <div class="slider-row"><label>Taille</label><input type="range" id="waist" min="0.6" max="1.5" step="0.05" value="1"><span id="waistVal">1.0</span></div>
     <div class="slider-row"><label>Heupen</label><input type="range" id="hips" min="0.7" max="1.8" step="0.05" value="1"><span id="hipsVal">1.0</span></div>
@@ -47,7 +47,7 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x12121f);
     const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 100);
-    camera.position.set(0, 1.2, 3.5);
+    camera.position.set(0, 1.15, 3.2);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(innerWidth, innerHeight);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -62,14 +62,14 @@
     controls.maxDistance = 8;
     controls.update();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const key = new THREE.DirectionalLight(0xfff5ee, 1.2);
-    key.position.set(2.5, 5, 3);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const key = new THREE.DirectionalLight(0xfff5ee, 1.35);
+    key.position.set(2.2, 4.8, 2.8);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xaaccff, 0.3);
-    fill.position.set(-3, 2.5, -1);
+    const fill = new THREE.DirectionalLight(0xaaccff, 0.35);
+    fill.position.set(-2.8, 2.2, -1.2);
     scene.add(fill);
 
     const ground = new THREE.Mesh(
@@ -80,10 +80,19 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
+    // Simple hair
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 });
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 18), hairMat);
+    hair.scale.set(1.05, 1.15, 1.0);
+    hair.position.set(0, 1.62, -0.02);
+    hair.castShadow = true;
+    scene.add(hair);
+
     let model = null;
     const status = document.getElementById('status');
     const loader = new GLTFLoader();
-    const modelUrl = 'https://raw.githubusercontent.com/075diice/3d-character-prototype/main/models/Superhero_Female_FullBody.gltf';
+    // Use the more realistic female-base.glb
+    const modelUrl = 'https://raw.githubusercontent.com/075diice/3d-character-prototype/main/models/female-base.glb';
 
     loader.load(modelUrl, (gltf) => {
       model = gltf.scene;
@@ -93,10 +102,18 @@
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+          // Ensure skin-like material if none
+          if (!child.material || child.material.color) {
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0xf0c8a0,
+              roughness: 0.52,
+              metalness: 0.0
+            });
+          }
         }
       });
       scene.add(model);
-      status.textContent = 'Superhero Female + textures geladen';
+      status.textContent = 'Realistisch model + haar geladen';
       updateCharacter();
     }, undefined, (err) => {
       console.error(err);
@@ -110,11 +127,18 @@
       const h = +document.getElementById('hips').value;
       const ht = +document.getElementById('height').value;
 
-      const scaleX = 1 + (b - 1) * 0.15 + (h - 1) * 0.1;
+      // Better proportional scaling
+      // X: influenced more by breasts + hips
+      // Z: more by hips
+      // Y: height
+      const scaleX = 1 + (b - 1) * 0.18 + (h - 1) * 0.12;
       const scaleY = ht;
-      const scaleZ = 1 + (b - 1) * 0.1 + (h - 1) * 0.15;
+      const scaleZ = 1 + (b - 1) * 0.08 + (h - 1) * 0.22;
       model.scale.set(scaleX, scaleY, scaleZ);
-      model.position.y = (ht - 1) * 0.3;
+      model.position.y = (ht - 1) * 0.25;
+
+      // Move hair with height
+      hair.position.y = 1.62 * ht;
 
       document.getElementById('breastVal').textContent = b.toFixed(1);
       document.getElementById('waistVal').textContent = w.toFixed(1);
